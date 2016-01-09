@@ -1,0 +1,11 @@
+{
+    "name": "Tufts University CEEO Stomp API",
+    "description": "API for students using STOMP related applications",
+    "author": "Sam Heilbron",
+    "require": {
+        "bramus/router": "dev-master",
+        "firebase/php-jwt": "~2.2",
+        "zendframework/zend-config": "~2.3",
+        "zendframework/zend-http": "~2.3"
+    }
+}

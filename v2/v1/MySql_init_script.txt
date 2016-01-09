@@ -1,0 +1,157 @@
+/*
+ *	Script to initialize MySql Database with specific tables
+ *
+ * Write a php script to create database/tables. For now just accumulate mysql statements
+ */
+ 
+CREATE TABLE School (
+	sid INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(30) NOT NULL,
+	address VARCHAR(50),
+	city VARCHAR(20),
+	zip INT,
+	main_phone CHAR(11),
+	PRIMARY KEY ( sid )
+);
+
+INSERT INTO School (name, address, city, zip, main_phone) 
+	VALUES ('Newton North', '54 Old Sudbury Rd', 'Newton', 02465, '6178345205'),
+		('Vassal Lane', '22 South Ave', 'Roxbury', 02987, '8910034563');
+
+CREATE TABLE Teacher (
+	teid INT NOT NULL AUTO_INCREMENT,
+	sid INT NOT NULL,
+	f_name VARCHAR(30) NOT NULL,
+	l_name VARCHAR(30),
+	phone CHAR(11),
+	email VARCHAR(30) NOT NULL,
+	grade INT,
+	FOREIGN KEY ( sid ) REFERENCES School(sid),
+	PRIMARY KEY ( teid )
+);
+
+INSERT INTO Teacher (sid, f_name, l_name, phone, email, grade) 
+	VALUES (1, 'Sally', 'Jones', '6178940306', 'sallyjones@school.com', 3),
+		(1, 'Barbara', 'Schott', '7813132030', 'bls@gmail.com', 2),
+		(2, 'Joan', 'Rivera', '2342344545', 'jrivs@yahoo.com', 4);
+
+CREATE TABLE Team (
+	tid INT NOT NULL AUTO_INCREMENT,
+	sid INT NOT NULL,
+	class DATETIME NOT NULL,
+	FOREIGN KEY ( sid ) REFERENCES School(sid),
+	PRIMARY KEY ( tid )
+);
+
+INSERT INTO Team (sid, class) 
+	VALUES (1, NOW()),
+		(1, NOW()),
+		(2, NOW());
+
+CREATE TABLE Team_Teacher (
+	zid INT NOT NULL AUTO_INCREMENT,
+	teid INT NOT NULL,
+	tid INT NOT NULL,
+	FOREIGN KEY ( teid ) REFERENCES Teacher(teid),
+	FOREIGN KEY ( tid ) REFERENCES Team(tid),
+	PRIMARY KEY ( zid )
+);
+
+INSERT INTO Team_Teacher (teid, tid) 
+	VALUES (1, 1),
+			(1, 2),
+			(1, 3),
+			(2, 2);
+
+CREATE TABLE Stomper (
+	uid INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(20) NOT NULL,
+	pwd CHAR(40) NOT NULL,
+	f_name VARCHAR(30) NOT NULL,
+	l_name VARCHAR(30) NOT NULL,
+	phone CHAR(11) NOT NULL,
+	email VARCHAR(30) NOT NULL,
+	PRIMARY KEY ( uid )
+);
+
+INSERT INTO Stomper (username, pwd, f_name, l_name, phone, email, permissions)
+	VALUES ('sheilb01', SHA1('stomp'), 'Sam', 'Heilbron', '6178940306', 'samheilbron@gmail.com', 'Stomper'),
+			('jbarb02', SHA1('stomp'), 'Jen', 'Barbara', '3456756789', 'jb@yahoo.com', 'Stomper'),
+			('btimo01', SHA1('stomp'), 'Ben', 'Timothy', '3452342323', 'benny122@gmail.com', 'Stomper');
+			
+	INSERT INTO Stomper (username, pwd, f_name, l_name, phone, email, permissions) VALUES ('devyn01', SHA1('stomp'), 'Devyn', 'Curley', '6178940306', 'samheilbron@gmail.com', 'Admin');
+				
+CREATE TABLE Stomper_Team (
+	tid INT NOT NULL,
+	uid INT NOT NULL,
+	FOREIGN KEY ( tid ) REFERENCES Team( tid ),
+	FOREIGN KEY ( uid ) REFERENCES Stomper( uid )
+);
+
+INSERT INTO Stomper_Team (tid, uid)
+	VALUES (1, 1),
+			(1, 2),
+			(2, 1),
+			(2, 3);
+					
+					
+CREATE TABLE Material (
+	mid INT NOT NULL AUTO_INCREMENT, 
+	name VARCHAR(40) NOT NULL, 
+	q_avail INT NOT NULL, 
+	q_reserved INT NOT NULL,
+	q_removed INT NOT NULL,
+	max_checkout_q INT NOT NULL, 
+	low_q_thresh INT NOT NULL, 
+	reusable TINYINT(1) NOT NULL,
+	PRIMARY KEY ( mid )
+);
+
+INSERT INTO Material (name, q_avail, q_reserved, q_removed, max_checkout_q, low_q_thresh) 
+		VALUES 
+			('Marbles', 100, 0, 0, 30, 10),
+			('Paper Clips', 50, 0, 0, 10, 5),
+			('NXT Robotics Kits', 25, 0, 0, 4, 0),
+			('Laptops', 15, 0, 0, 4, 0),
+			('Spaghetti Boxes', 25, 0, 0, 5, 5),
+			('Snap Circuits', 8, 0, 0, 2, 0);	 
+
+CREATE TABLE Transaction (
+	zid INT NOT NULL AUTO_INCREMENT,
+	trid INT NOT NULL,
+	tid INT NOT NULL,
+	uid INT NOT NULL,
+	mid INT NOT NULL,
+	quantity INT NOT NULL,
+	transaction_date DATETIME NOT NULL DEFAULT NOW(),
+	res_type enum('remove', 'reserve') NOT NULL DEFAULT 'reserve',
+	action_date DATETIME NOT NULL,
+	FOREIGN KEY ( tid ) REFERENCES Team( tid ),
+	FOREIGN KEY ( uid ) REFERENCES Stomper( uid ),
+	FOREIGN KEY ( mid ) REFERENCES Material( mid ),
+	PRIMARY KEY ( zid )
+);
+
+// Get tid,uid and permission values for user depending on their username
+SELECT g.tid,u.uid,u.permissions FROM Stomper AS u INNER JOIN Stomper_Team AS g USING (uid) WHERE u.username = 'sheilb01'
+
+SELECT tid FROM Stomper_Team where uid = 
+
+SELECT mid FROM Material WHERE name = 'Marbles'
+
+
+INSERT INTO Transaction (trid, tid, uid, mid, quantity, transaction_date, res_type, action_date)
+	VALUES ()
+
+
+SELECT m.name, tr.quantity, tr.transaction_date, tr.action_date, s.f_name, s.l_name 
+FROM Transaction AS tr 
+INNER JOIN Material AS m 
+USING (mid)
+INNER JOIN Stomper AS s 
+USING (uid)
+where tr.tid = 2 and tr.res_type = 'reserve';
+
+
+SELECT g.tid,u.uid,u.permissions FROM Stomper AS u INNER JOIN Stomper_Team AS g USING (uid) 
+								WHERE u.username = 'devyn01' and u.pwd=SHA1('stomp') limit 1
